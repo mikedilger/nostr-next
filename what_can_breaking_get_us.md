@@ -5,7 +5,7 @@ all again, but did it right this time?"
 
 That is a question I've heard quite a number of times, and it is a question I have pondered quite a lot myself.
 
-My conclusion (so far) is that I believe that we can fix everything without starting over. There are different levels of breakage, starting over is the most extreme of them. In this post I will describe these levels of breakage and what each one could buy us.
+My conclusion (so far) is that I believe that we can fix all the important things without starting over. There are different levels of breakage, starting over is the most extreme of them. In this post I will describe these levels of breakage and what each one could buy us.
 
 
 # Cryptography
@@ -14,7 +14,7 @@ Your keypair is the most fundamental part of nostr. That is your portable identi
 
 If the cryptography changed from secp256k1 to ed25519, all current nostr identities would not be usable.
 
-This would be a complete start over, not just a hard fork.
+This would be a complete start over.
 
 Every other break listed in this post could be done as well to no additional detriment (save for reuse of some existing code) because we would be starting over.
 
@@ -22,11 +22,12 @@ Why would anyone suggest making such a break? What does this buy us?
 
 - [Curve25519 is a safe curve](https://safecurves.cr.yp.to/) meaning a bunch of specific cryptography things that us mortals do not understand but we are assured that it is somehow better.
 - Ed25519 is more modern, said to be faster, and has more widespread code/library support than secp256k1.
-- Nostr keys could be used as TLS server certificates. [TLS 1.3](https://tools.ietf.org/html/rfc8446#section-4.4.2) using [RFC 7250 Raw Public Keys](https://tools.ietf.org/html/rfc7250) allows raw public keys as certificates. No DNS or certification authorities required, removing several points of failure. These ed25519 keys could be used in TLS, whereas secp256k1 keys cannot as no TLS algorithm utilizes them AFAIK. Note however that we do not need to break nostr cryptography to go down this path - we could just as well keep secp256k1 keys for users and use ed25519 keys for relays.
+- Nostr keys could be used as TLS server certificates. [TLS 1.3](https://tools.ietf.org/html/rfc8446#section-4.4.2) using [RFC 7250 Raw Public Keys](https://tools.ietf.org/html/rfc7250) allows raw public keys as certificates. No DNS or certification authorities required, removing several points of failure. These ed25519 keys could be used in TLS, whereas secp256k1 keys cannot as no TLS algorithm utilizes them AFAIK. Since relays currently don't have assigned nostr identities but are instead referenced by a websocket URL, this doesn't buy us much, but it is interesting. This idea is explored further below (keep reading) under a lesser level of breakage.
 
 Besides breaking everything, another downside is that people would not be able to manage nostr keys with bitcoin hardware.
 
 I am fairly strongly against breaking things this far. I don't think it is worth it.
+
 
 # Signature Scheme and Event Structure
 
@@ -45,9 +46,26 @@ What could we gain by breaking things this far?
 
 I am currently against this kind of break. I don't think the benefits even come close to outweighing the cost. But if I learned about other things that we could "fix" by restructuring the events, I could possibly change my mind.
 
+
+# Replacing Relay URLs
+
+Nostr is defined by relays that are addressed by websocket URLs. If that changed, that would be a significant break. Many (maybe even most) current event kinds would need superceding.
+
+The most reasonable change is to define relays with nostr identities, specifying their pubkey instead of their URL.
+
+What could we gain by this?
+
+- We could ditch reliance on DNS. Relays could publish events under their nostr identity that advertise their current IP address(es).
+- We could ditch certificates because relays could generate ed25519 keypairs for themselves (or indeed just self-signed certificates which might be much more broadly supported) and publish their public ed25519 key in the same replaceable event where they advertise their current IP address(es).
+
+This is a huge break, but also gives us something huge.
+
+I am strongly ambivalent about this idea.
+
+
 # Protocol Messaging and Transport
 
-The protocol messages of nostr are the next level of breakage. We could preserve keypair identities, all current events, but just break the protocol of how clients and relay communicate this data.
+The protocol messages of nostr are the next level of breakage. We could preserve keypair identities, all current events, and current relay URL references, but just break the protocol of how clients and relay communicate this data.
 
 This would not necessarily break relay and client implementations at all, so long as the new protocol were opt-in.
 
@@ -62,22 +80,18 @@ The downsides are just that if you want this new stuff you have to build it. It 
 
 Nonetheless, this I am in favor of. I think the trade-offs are worth it. I will be pushing a draft PR for this soon.
 
+
 # The path forward
 
 I propose then the following path forward:
 
 1. A new nostr protocol over websockets binary (draft PR to be shared soon)
-2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, ok?) via a
-   big push to get all the clients to support it (that will be slow and painful as people
-   on clients that don't support it yet will not recognize your subkey as you and will miss
-   all of your messages during the transition).
-3. We assign ed25519 keys to relays, and relays publish their IP address to nostr events.
-   This allows us to discard DNS and certificates. Relay identities would however not be nostr
-   identities.
+2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, ok?) via a big push to get all the clients to support it (that will be slow and painful as people on clients that don't support it yet will not recognize your subkey as you and will miss all of your messages during the transition).
+3. We seriously consider replacing Relay URLs with nostr pubkeys assigned to the relay, and then have relays publish their IP address and TLS key or certificate.
 
 We sacrifice these:
 
 1. Faster event hash/verification
 2. Composable event bitflags
 2. Safer faster more well-supported crypto curve
-3. Nostr keys as TLS 1.3 certificates
+3. Nostr keys themselves as TLS 1.3 RawPublicKey certificates
