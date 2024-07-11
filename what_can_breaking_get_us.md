@@ -87,7 +87,7 @@ Nonetheless, this I am in favor of. I think the trade-offs are worth it. I will 
 I propose then the following path forward:
 
 1. A new nostr protocol over websockets binary (draft PR to be shared soon)
-2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, OK?) via a big push to get all the clients to support it (that will be slow and painful as people on clients that don't support it yet will not recognize your subkey as you and will miss all of your messages during the transition).
+2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, OK?) via a big push to get all the clients to support it (the transition will be painful - most major clients will need to support this before anybody can start using it).
 3. We seriously consider replacing Relay URLs with nostr pubkeys assigned to the relay, and then have relays publish their IP address and TLS key or certificate.
 
 We sacrifice these:
