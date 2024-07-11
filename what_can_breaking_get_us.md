@@ -88,11 +88,12 @@ I propose then the following path forward:
 
 1. A new nostr protocol over websockets binary (draft PR to be shared soon)
 2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, OK?) via a big push to get all the clients to support it (the transition will be painful - most major clients will need to support this before anybody can start using it).
-3. We seriously consider replacing Relay URLs with nostr pubkeys assigned to the relay, and then have relays publish their IP address and TLS key or certificate.
+3. Some kind of solution to the negative-filter-negentropy need added to the new protocol as its first optional feature.
+4. We seriously consider replacing Relay URLs with nostr pubkeys assigned to the relay, and then have relays publish their IP address and TLS key or certificate.
 
 We sacrifice these:
 
 1. Faster event hash/verification
 2. Composable event bitflags
-2. Safer faster more well-supported crypto curve
-3. Nostr keys themselves as TLS 1.3 RawPublicKey certificates
+3. Safer faster more well-supported crypto curve
+4. Nostr keys themselves as TLS 1.3 RawPublicKey certificates
