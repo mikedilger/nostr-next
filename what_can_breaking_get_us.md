@@ -10,7 +10,7 @@ My conclusion (so far) is that I believe that we can fix all the important thing
 
 # Cryptography
 
-Your keypair is the most fundamental part of nostr. That is your portable identity.
+Your key-pair is the most fundamental part of nostr. That is your portable identity.
 
 If the cryptography changed from secp256k1 to ed25519, all current nostr identities would not be usable.
 
@@ -49,7 +49,7 @@ I am currently against this kind of break. I don't think the benefits even come 
 
 # Replacing Relay URLs
 
-Nostr is defined by relays that are addressed by websocket URLs. If that changed, that would be a significant break. Many (maybe even most) current event kinds would need superceding.
+Nostr is defined by relays that are addressed by websocket URLs. If that changed, that would be a significant break. Many (maybe even most) current event kinds would need superseding.
 
 The most reasonable change is to define relays with nostr identities, specifying their pubkey instead of their URL.
 
@@ -60,7 +60,7 @@ What could we gain by this?
 
 This is a huge break, but also gives us something huge.
 
-I am strongly ambivalent about this idea.
+I am ambivalent about this idea.
 
 
 # Protocol Messaging and Transport
@@ -71,10 +71,11 @@ This would not necessarily break relay and client implementations at all, so lon
 
 What could we get?
 
-- The new protocol could transmit events in binary form for increased performance.
+- The new protocol could transmit events in binary form for increased performance (no more JSON parsing with it's typical many small memory allocations and string escaping nightmares). I think event throughput could double (wild guess).
 - It could have clear expectations of who talks first, and when and how AUTH happens, avoiding a lot of current miscommunication between clients and relays.
 - We could introduce bitflags for feature support so that new features could be added later and clients would not bother trying them (and getting an error or timing out) on relays that didn't signal support. This could replace much of NIP-11.
 - We could then introduce something like negentropy or negative filters (but not that... probably something else solving that same problem) without it being a breaking change.
+- The new protocol could just be a few websocket-binary messages enhancing the current protocol, continuing to leverage the existing websocket-text messages we currently have, meaning newer relays would still support all the older stuff.
 
 The downsides are just that if you want this new stuff you have to build it. It makes the protocol less simple, having now multiple protocols, multiple ways of doing the same thing.
 
@@ -86,7 +87,7 @@ Nonetheless, this I am in favor of. I think the trade-offs are worth it. I will 
 I propose then the following path forward:
 
 1. A new nostr protocol over websockets binary (draft PR to be shared soon)
-2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, ok?) via a big push to get all the clients to support it (that will be slow and painful as people on clients that don't support it yet will not recognize your subkey as you and will miss all of your messages during the transition).
+2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, OK?) via a big push to get all the clients to support it (that will be slow and painful as people on clients that don't support it yet will not recognize your subkey as you and will miss all of your messages during the transition).
 3. We seriously consider replacing Relay URLs with nostr pubkeys assigned to the relay, and then have relays publish their IP address and TLS key or certificate.
 
 We sacrifice these:
