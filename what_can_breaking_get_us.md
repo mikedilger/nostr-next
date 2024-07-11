@@ -61,3 +61,23 @@ What could we get?
 The downsides are just that if you want this new stuff you have to build it. It makes the protocol less simple, having now multiple protocols, multiple ways of doing the same thing.
 
 Nonetheless, this I am in favor of. I think the trade-offs are worth it. I will be pushing a draft PR for this soon.
+
+# The path forward
+
+I propose then the following path forward:
+
+1. A new nostr protocol over websockets binary (draft PR to be shared soon)
+2. Subkeys brought into nostr via NIP-26 (but let's use a single letter tag instead, ok?) via a
+   big push to get all the clients to support it (that will be slow and painful as people
+   on clients that don't support it yet will not recognize your subkey as you and will miss
+   all of your messages during the transition).
+3. We assign ed25519 keys to relays, and relays publish their IP address to nostr events.
+   This allows us to discard DNS and certificates. Relay identities would however not be nostr
+   identities.
+
+We sacrifice these:
+
+1. Faster event hash/verification
+2. Composable event bitflags
+2. Safer faster more well-supported crypto curve
+3. Nostr keys as TLS 1.3 certificates
