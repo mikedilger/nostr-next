@@ -58,7 +58,7 @@ What could we gain by this?
 - We could ditch reliance on DNS. Relays could publish events under their nostr identity that advertise their current IP address(es).
 - We could ditch certificates because relays could generate ed25519 keypairs for themselves (or indeed just self-signed certificates which might be much more broadly supported) and publish their public ed25519 key in the same replaceable event where they advertise their current IP address(es).
 
-This is a huge break, but also gives us something huge.
+This is a gigantic break. Almost all event kinds need redefining and pretty much all nostr software will need fairly major upgrades. But it also gives us a kind of Internet liberty that many of us have dreamt of our entire lives.
 
 I am ambivalent about this idea.
 
